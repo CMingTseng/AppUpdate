@@ -113,6 +113,7 @@ public class Updater {
                                     mUpdating = false;
                                 }
                             });
+                            builder.setCancelable(false);
                             builder.create().show();
                         }
                     });
@@ -151,6 +152,8 @@ public class Updater {
                     }
                 });
                 SharedPreferences.Editor editor = getSharedPreferencesEditor();
+                editor.putString(PREF_JSON, mOnlineAppInfo.toString());
+                editor.apply();
 //                if (mOnlineAppInfo.getCode() == 0) {
 //                    editor.putInt(PREF_ONLINE_VERSION_CODE, mOnlineAppInfo.getVersionCode());
 //                    editor.apply();
@@ -187,7 +190,7 @@ public class Updater {
                         SharedPreferences.Editor editor = getSharedPreferencesEditor();
                         editor.putInt(PREF_ONLINE_VERSION_CODE, mOnlineAppInfo.optInt("versionCode"));
                         editor.putLong(PREF_DOWNLOAD_ID, mDownloadId);
-                        editor.putString(PREF_JSON, mOnlineAppInfo.toString());
+
                         editor.apply();
                     }
                 }

@@ -58,5 +58,5 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:23.3.0'
     testCompile 'junit:junit:4.12'
-    compile project(':updater')
+    compile project(':lib')
 }

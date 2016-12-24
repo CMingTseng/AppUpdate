@@ -7,14 +7,19 @@ import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
+import io.github.skyhacker2.aboutpage.AboutActivity;
+import io.github.skyhacker2.aboutpage.MyAppInfos;
 import io.github.skyhacker2.updater.OnlineParams;
 import io.github.skyhacker2.updater.Updater;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextView;
+    private Button mAboutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +30,18 @@ public class MainActivity extends AppCompatActivity {
         Updater.getInstance(this).checkUpdate();
 
         mTextView = (TextView) findViewById(R.id.text);
+        mAboutButton = (Button) findViewById(R.id.about);
         updateTextView();
+
+        mAboutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        MyAppInfos.getInstance(this).updateAppInfos();
     }
 
     @Override

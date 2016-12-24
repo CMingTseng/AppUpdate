@@ -1,6 +1,6 @@
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-version = "1.0.9"
+version = "1.0.1"
 def siteUrl = 'https://github.com/skyhacker2/AppUpdate'    // project homepage
 def gitUrl = 'https://github.com/skyhacker2/AppUpdate.git' // project git
 group ="io.github.skyhacker2"
@@ -12,7 +12,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'App Update Library For Hunuo'
+                name 'Eleven App Lib'
                 url siteUrl
                 licenses {
                     license {
@@ -65,7 +65,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "updater" // #CONFIG# project name in jcenter
+        name = "eleven-app-lib" // #CONFIG# project name in jcenter
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]

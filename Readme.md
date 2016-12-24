@@ -1,4 +1,15 @@
-# Updater
+# ElevenAppLib
+
+为我的App提供以下通用的功能
+
+- 统一的广告接口
+- 统一的About Page
+- 自动更新服务
+- 应用评分
+
+
+
+## Updater(自动更新服务)
 
 结合Github和七牛的app在线更新。
 
