@@ -4,6 +4,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v7.widget.Toolbar;
@@ -35,7 +37,16 @@ public class AboutPage {
         mContext = context;
         mView = LayoutInflater.from(context).inflate(R.layout.aboutpage, null, false);
         setAppIcon(mContext.getApplicationInfo().icon);
-        setAppVersion("Version: " + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")");
+
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            PackageInfo info = pm.getPackageInfo(mContext.getPackageName(), 0);
+            setAppVersion("Version: " + info.versionName + " (" + info.versionCode + ")");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
         setAppName(mContext.getApplicationInfo().labelRes);
     }
 
