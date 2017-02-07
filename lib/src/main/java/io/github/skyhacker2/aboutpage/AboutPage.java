@@ -21,6 +21,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import io.github.skyhacker2.updater.BuildConfig;
 import io.github.skyhacker2.updater.R;
 
@@ -161,7 +163,12 @@ public class AboutPage {
             public void onClick(View v) {
                 Log.d("AboutPage", "package " + mContext.getPackageName());
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + mContext.getPackageName()));
-                mContext.startActivity(intent);
+                PackageManager packageManager = mContext.getPackageManager();
+                List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                boolean intentSafe = activities.size() > 0;
+                if (intentSafe) {
+                    mContext.startActivity(intent);
+                }
             }
         };
 
@@ -222,6 +229,21 @@ public class AboutPage {
         };
         addItem(item);
 
+        return this;
+    }
+
+    public AboutPage addDonateUsers(final String title) {
+        AboutItem item = new AboutItem();
+        item.icon = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_settings_donate_users);
+        item.title = title;
+        item.clickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://skyhacker2.github.io/blog/index.html?/donate.md"));
+                mContext.startActivity(intent);
+            }
+        };
+        addItem(item);
         return this;
     }
 

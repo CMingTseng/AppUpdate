@@ -37,7 +37,7 @@
             android:text="xx"/>
         <TextView
             android:id="@+id/aboutText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:gravity="center"

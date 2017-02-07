@@ -1,5 +1,6 @@
 package io.github.skyhacker2.aboutpage;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -20,6 +21,7 @@ public class AboutActivity extends AppCompatActivity {
                 .addEmail(getString(R.string.app_lib_feedback), "skyhacker@126.com")
                 .addShare(getString(R.string.app_lib_share), "推荐你使用小磁力BT")
                 .addAliPay(getString(R.string.app_lib_alipay))
+                .addDonateUsers("赞助记录")
                 .addGroup(getString(R.string.app_lib_more_app));
 
         List<AboutItem> apps = MyAppInfos.getInstance(this).getApps();
@@ -28,5 +30,14 @@ public class AboutActivity extends AppCompatActivity {
         }
 
         setContentView(aboutPage.build());
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
+    public static class Builder {
+        public Builder(Context context) {
+
+        }
     }
 }
