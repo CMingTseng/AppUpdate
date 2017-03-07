@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import io.github.skyhacker2.updater.BuildConfig;
@@ -31,6 +36,7 @@ import io.github.skyhacker2.updater.R;
  */
 
 public class AboutPage {
+    private final static String TAG = AboutPage.class.getSimpleName();
     private Context mContext;
     private View mView;
     private Toolbar mToolbar;
@@ -201,10 +207,34 @@ public class AboutPage {
         item.clickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, shareText);
-                mContext.startActivity(Intent.createChooser(intent, title));
+//                Intent intent = new Intent(Intent.ACTION_SEND);
+//                intent.setType("text/plain");
+//                intent.putExtra(Intent.EXTRA_TEXT, shareText);
+//                mContext.startActivity(Intent.createChooser(intent, title));
+
+                ApplicationInfo appInfo = mContext.getApplicationInfo();
+                File cacheDir = mContext.getExternalCacheDir();
+                try {
+                    File apkFile = new File(cacheDir, appInfo.packageName + ".apk");
+                    if (!apkFile.exists()) {
+                        FileInputStream input = new FileInputStream(new File(appInfo.sourceDir));
+                        FileOutputStream output = new FileOutputStream(apkFile);
+                        byte[] bytes = new byte[1024];
+                        int read = 0;
+                        while ((read = input.read(bytes)) > 0) {
+                            output.write(bytes, 0, read);
+                        }
+                        input.close();
+                        output.close();
+                    }
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("application/vnd.android.package-archive");
+                    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(apkFile));
+                    mContext.startActivity(Intent.createChooser(intent, "分享"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         };
         addItem(item);
