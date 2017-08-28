@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -185,6 +186,9 @@ public class Updater {
                         Toast.makeText(mContext, getString("app_update_start"), Toast.LENGTH_LONG).show();
                         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadURL));
                         request.setTitle(mAppName);
+                        String[] patterns = downloadURL.split("/");
+                        String fileName = patterns[patterns.length-1];
+                        request = request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
                         long id = mDownloadManager.enqueue(request);
                         mDownloadId = id;
                         SharedPreferences.Editor editor = getSharedPreferencesEditor();

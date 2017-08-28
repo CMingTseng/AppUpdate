@@ -254,6 +254,7 @@ public class MyAppInfos {
                     }
 
                     AboutItem item = new AboutItem();
+                    item.packageName = app.optString("packageName");
                     item.title = app.optString("title");
                     item.subtitle = app.optString("subtitle");
                     File iconFile = new File(mAppDir, app.optString("icon"));

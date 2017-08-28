@@ -5,15 +5,16 @@
               android:layout_height="50dp">
     <View
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="#55000000"/>
+        android:layout_height="1dp"
+        android:background="#d2d2d2"/>
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="关于我们"
         android:layout_marginTop="@dimen/about_section_margin_top"
-        android:textSize="13sp"
+        android:textSize="14sp"
+        android:textColor="@color/colorAccent"
         android:paddingLeft="@dimen/about_section_padding_left"
         />
 
