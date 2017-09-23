@@ -13,6 +13,11 @@ import android.support.v7.app.AlertDialog;
  */
 
 public class Rater {
+
+    public static void rateApp(Activity context, int titleRes, int messageRes) {
+        rateApp(context, context.getString(titleRes), context.getString(messageRes));
+    }
+
     public static void rateApp(Activity context, String title, String message) {
         SharedPreferences preferences = context.getSharedPreferences("AppRate", Activity.MODE_PRIVATE);
         boolean hasRate = preferences.getBoolean("has_rate", false);
