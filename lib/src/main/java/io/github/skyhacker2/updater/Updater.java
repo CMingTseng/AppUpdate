@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 /**
  * Created by eleven on 2016/10/25.
@@ -57,6 +58,7 @@ public class Updater {
     private String mUpdateUrl;
     private boolean mDebug = false;
     private String mChannelKey = "UMENG_CHANNEL";
+    private boolean mInstallFromStore = false;
 
     BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
         @Override
@@ -206,18 +208,28 @@ public class Updater {
         }
 
         public void startUpdate() {
-            int saveVersionCode = getSharedPreferences().getInt(PREF_ONLINE_VERSION_CODE, -1);
-            // 上次有保存
-            if (saveVersionCode == mOnlineAppInfo.optInt("versionCode")) {
-                Uri uri = checkIfAlreadyExist();
-                if (uri != null) {
-                    Log.d(TAG, "使用已经存在的安装包");
-                    installApk(uri);
+            if (mInstallFromStore) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + mContext.getPackageName()));
+                PackageManager packageManager = mContext.getPackageManager();
+                List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                boolean intentSafe = activities.size() > 0;
+                if (intentSafe) {
+                    mContext.startActivity(intent);
+                }
+            } else {
+                int saveVersionCode = getSharedPreferences().getInt(PREF_ONLINE_VERSION_CODE, -1);
+                // 上次有保存
+                if (saveVersionCode == mOnlineAppInfo.optInt("versionCode")) {
+                    Uri uri = checkIfAlreadyExist();
+                    if (uri != null) {
+                        Log.d(TAG, "使用已经存在的安装包");
+                        installApk(uri);
+                    } else {
+                        startDownload();
+                    }
                 } else {
                     startDownload();
                 }
-            } else {
-                startDownload();
             }
         }
     }
@@ -273,7 +285,12 @@ public class Updater {
     }
 
     public void checkUpdate() {
+        checkUpdate(false);
+    }
+
+    public void checkUpdate(boolean goToStore) {
         Log.d(TAG, "开始检查App更新");
+        mInstallFromStore = goToStore;
 
 //        mContext.registerReceiver(mDownloadReceiver, filter);
 
