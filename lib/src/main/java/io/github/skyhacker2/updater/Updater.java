@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,8 +18,10 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
@@ -26,6 +29,8 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -41,6 +46,7 @@ public class Updater {
     private static final String TAG = Updater.class.getSimpleName();
     private static final String PREF_DOWNLOAD_ID = "pref_download_id";
     private static final String PREF_ONLINE_VERSION_CODE = "pref_prev_version_code";
+    private static final String PREF_DOWNLOAD_PATH = "pref_download_path";
     private static final String PREF_JSON = "pref_json";
 
     public static final String ACTION_ONLINE_PARAMS_UPDATED = "io.github.skyhacker2.updater.ACTION_ONLINE_PARAMS_UPDATED";
@@ -69,15 +75,10 @@ public class Updater {
                 if (id == mDownloadId) {
                     Log.d(TAG, "下载完成");
                     mUpdating = false;
-                    Cursor c = mDownloadManager.query(new DownloadManager.Query().setFilterById(mDownloadId));
-                    if (c != null && c.moveToFirst()) {
-                        // 判断是否真的完成
-                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
-                            String filename = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                            Log.d(TAG, "filename " + filename);
-                            Uri uri = Uri.parse("file://" + filename);
-                            installApk(uri);
-                        }
+                    Uri uri = checkIfAlreadyExist();
+                    if (uri != null) {
+                        Log.d(TAG, "uri " + uri);
+                        installApk(uri);
                     }
                 }
             }
@@ -196,6 +197,9 @@ public class Updater {
                         SharedPreferences.Editor editor = getSharedPreferencesEditor();
                         editor.putInt(PREF_ONLINE_VERSION_CODE, mOnlineAppInfo.optInt("versionCode"));
                         editor.putLong(PREF_DOWNLOAD_ID, mDownloadId);
+                        File folder = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
+                        File downloadPath = new File(folder, fileName);
+                        editor.putString(PREF_DOWNLOAD_PATH, downloadPath.getAbsolutePath());
 
                         editor.apply();
                     }
@@ -222,7 +226,7 @@ public class Updater {
                 if (saveVersionCode == mOnlineAppInfo.optInt("versionCode")) {
                     Uri uri = checkIfAlreadyExist();
                     if (uri != null) {
-                        Log.d(TAG, "使用已经存在的安装包");
+                        Log.d(TAG, "使用已经存在的安装包 " + uri);
                         installApk(uri);
                     } else {
                         startDownload();
@@ -273,6 +277,8 @@ public class Updater {
                 e.printStackTrace();
             }
         }
+
+        Log.d(TAG, "package " + mContext.getPackageName());
     }
 
     public String getAppID() {
@@ -361,6 +367,7 @@ public class Updater {
 
     private void installApk(Uri uri) {
         Intent apkIntent = new Intent(Intent.ACTION_VIEW);
+        apkIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         Log.d(TAG, "uri " + uri);
         apkIntent.setDataAndType(uri, "application/vnd.android.package-archive");
         mContext.startActivity(apkIntent);
@@ -372,17 +379,26 @@ public class Updater {
     }
 
     private Uri checkIfAlreadyExist() {
-        long downloadId = getSharedPreferences().getLong(PREF_DOWNLOAD_ID, -1);
-        Cursor cursor = mDownloadManager.query(new DownloadManager.Query().setFilterById(downloadId));
-        if (cursor != null && cursor.moveToFirst()) {
-            if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                String filename = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                Log.d(TAG, "filename " + filename);
-                Uri uri = Uri.parse("file://" + filename);
-                return uri;
+        String downloadPath = getSharedPreferences().getString(PREF_DOWNLOAD_PATH, null);
+        Log.d(TAG, "downloadPath " + downloadPath);
+        if (downloadPath != null) {
+            File apkFile = new File(downloadPath);
+            if (apkFile.exists()) {
+                return getFileUri(apkFile);
+            } else {
+                return null;
             }
         }
         return null;
+    }
+
+    private Uri getFileUri(File file) {
+        Log.d(TAG, "authorities " + mContext.getPackageName() + ".fileprovider");
+        if (Build.VERSION.SDK_INT >= 24) {
+            return FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".fileprovider", file);
+        } else {
+            return Uri.parse("file://" + file.getAbsolutePath());
+        }
     }
 
     public boolean isDebug() {
