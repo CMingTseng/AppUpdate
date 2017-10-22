@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -178,10 +179,10 @@ public class Updater {
                 JSONObject channels = mOnlineAppInfo.optJSONObject("channels");
                 if (channels != null) {
                     String downloadURL = channels.optString(channel);
-                    if (downloadURL == null){
+                    if (TextUtils.isEmpty(downloadURL)){
                         downloadURL = channels.optString("source");
                     }
-                    if (downloadURL != null){
+                    if (!TextUtils.isEmpty(downloadURL)){
                         // 注册下载完成广播
                         IntentFilter filter = new IntentFilter();
                         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
