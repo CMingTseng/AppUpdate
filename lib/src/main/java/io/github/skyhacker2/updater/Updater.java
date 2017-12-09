@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -49,6 +50,10 @@ public class Updater {
     private static final String PREF_ONLINE_VERSION_CODE = "pref_prev_version_code";
     private static final String PREF_DOWNLOAD_PATH = "pref_download_path";
     private static final String PREF_JSON = "pref_json";
+    // 更新模式
+    public static final int INSTALL_MODE_APP = 0;      // 应用内
+    public static final int INSTALL_MODE_STORE = 1;    // 应用商店
+    public static final int INSTALL_MODE_BROWSER = 2;  // 跳到浏览器下载
 
     public static final String ACTION_ONLINE_PARAMS_UPDATED = "io.github.skyhacker2.updater.ACTION_ONLINE_PARAMS_UPDATED";
 
@@ -66,6 +71,7 @@ public class Updater {
     private boolean mDebug = false;
     private String mChannelKey = "UMENG_CHANNEL";
     private boolean mInstallFromStore = false;
+    private int mInstallMode = INSTALL_MODE_APP;
 
     BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
         @Override
@@ -144,8 +150,12 @@ public class Updater {
                 String json = new String(combined, "utf-8");
                 Log.d(TAG, "online version json " + json);
                 mOnlineAppInfo = new JSONObject(json);
+                if (!isDebug()) {
+                    mInstallMode = mOnlineAppInfo.optInt("installMode");
+                }
                 Log.d(TAG, "online versionCode " + mOnlineAppInfo.optString("versionCode"));
                 Log.d(TAG, "online versionName " + mOnlineAppInfo.optString("versionName"));
+                Log.d(TAG, "install mode " + mInstallMode);
                 JSONObject onlineParams = mOnlineAppInfo.optJSONObject("onlineParams");
                 OnlineParams.setParams(onlineParams);
                 mContext.runOnUiThread(new Runnable() {
@@ -172,7 +182,15 @@ public class Updater {
             }
         }
 
+        private boolean checkPermission() {
+            return ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        }
+
         public void startDownload() {
+            if (!checkPermission()) {
+                Toast.makeText(mContext, "没有写入SD卡权限", Toast.LENGTH_LONG).show();
+                return;
+            }
             try {
                 ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA);
                 String channel = info.metaData.getString(mChannelKey);
@@ -213,13 +231,31 @@ public class Updater {
         }
 
         public void startUpdate() {
-            if (mInstallFromStore) {
+            if (mInstallFromStore || mInstallMode == INSTALL_MODE_STORE) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + mContext.getPackageName()));
                 PackageManager packageManager = mContext.getPackageManager();
                 List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
                 boolean intentSafe = activities.size() > 0;
                 if (intentSafe) {
                     mContext.startActivity(intent);
+                }
+            } else if (mInstallMode == INSTALL_MODE_BROWSER) {  // 打开浏览器下载安装包的方式
+                try {
+                    ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA);
+                    String channel = info.metaData.getString(mChannelKey);
+                    JSONObject channels = mOnlineAppInfo.optJSONObject("channels");
+                    if (channels != null) {
+                        String downloadURL = channels.optString(channel);
+                        if (TextUtils.isEmpty(downloadURL)) {
+                            downloadURL = channels.optString("source");
+                        }
+                        if (!TextUtils.isEmpty(downloadURL)) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadURL));
+                            mContext.startActivity(intent);
+                        }
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
                 }
             } else {
                 int saveVersionCode = getSharedPreferences().getInt(PREF_ONLINE_VERSION_CODE, -1);
@@ -344,6 +380,14 @@ public class Updater {
 
     public void setUpdateUrl(String updateUrl) {
         mUpdateUrl = updateUrl;
+    }
+
+    public int getInstallMode() {
+        return mInstallMode;
+    }
+
+    public void setInstallMode(int installMode) {
+        mInstallMode = installMode;
     }
 
     //// 内部函数

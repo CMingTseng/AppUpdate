@@ -284,4 +284,62 @@ public class MyAppInfos {
 
         return mApps;
     }
+
+    public List<AboutItem> getApps(String[] excludes) {
+        File appsFile = new File(mAppDir, "apps.json");
+        if (appsFile.exists()) {
+            mApps.clear();
+            try {
+                FileInputStream inputStream = new FileInputStream(appsFile);
+                byte[] buffer = new byte[inputStream.available()];
+                inputStream.read(buffer);
+                String json = new String(buffer, "utf-8");
+                JSONArray array = new JSONArray(json);
+                for (int i = 0; i < array.length(); i++) {
+                    final JSONObject app = array.getJSONObject(i);
+                    boolean exclude = false;
+                    if (excludes != null) {
+                        for (String e : excludes) {
+                            if (e.equals(app.optString("packageName"))) {
+                                exclude = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (exclude) {
+                        continue;
+                    }
+
+                    AboutItem item = new AboutItem();
+                    item.packageName = app.optString("packageName");
+                    item.title = app.optString("title");
+                    item.subtitle = app.optString("subtitle");
+                    File iconFile = new File(mAppDir, app.optString("icon"));
+                    if (!iconFile.exists()) {
+                        continue;
+                    }
+                    item.icon = BitmapFactory.decodeFile(iconFile.getAbsolutePath());
+                    item.clickListener = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + app.optString("packageName")));
+                            mContext.startActivity(intent);
+                        }
+                    };
+                    mApps.add(item);
+                }
+
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return mApps;
+    }
 }
