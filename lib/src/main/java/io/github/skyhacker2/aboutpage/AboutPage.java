@@ -79,6 +79,7 @@ public class AboutPage {
     public AboutPage setAboutText(String text) {
         TextView textView = getView(R.id.aboutText);
         textView.setText(text);
+        textView.setTextIsSelectable(true);
         return this;
     }
 

@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="io.github.skyhacker2.paykit">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <application>
+        <activity android:name="cn.bmob.pay.v3.act.PayAct" />
+    </application>
+</manifest>
