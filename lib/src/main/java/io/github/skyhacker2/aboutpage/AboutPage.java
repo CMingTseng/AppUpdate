@@ -278,6 +278,26 @@ public class AboutPage {
         return this;
     }
 
+    public AboutPage addQQGroup(final String groupNumber) {
+        AboutItem item = new AboutItem();
+        item.icon = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_settings_qqgroup);
+        item.title = "QQ群:" + groupNumber;
+        item.clickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager)
+                        mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("QQ群", groupNumber);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(mContext, "已复制群号", Toast.LENGTH_LONG).show();
+            }
+        };
+        addItem(item);
+
+        return this;
+
+    }
+
 
     public <T extends View> T getView(int id) {
         return (T)mView.findViewById(id);
