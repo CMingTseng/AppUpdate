@@ -1,15 +1,19 @@
 package io.github.skyhacker2.paykit;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Random;
 
 /**
@@ -69,10 +73,9 @@ public class Utils {
         Log.d(TAG, "保存截图到相册，路径: " + url);
     }
 
-    public static Bitmap takeScreenshot(Activity activity, View view) {
+    public static void takeScreenshot(Activity activity, View view) {
         if (view == null) {
             Log.w(TAG, "screenshot:view is null");
-            return null;
         }
         boolean isCacheEnable = view.isDrawingCacheEnabled();
         view.setDrawingCacheEnabled(true);
@@ -87,6 +90,30 @@ public class Utils {
             view.destroyDrawingCache();
             view.setDrawingCacheEnabled(isCacheEnable);
         }
-        return bmp;
+    }
+
+    public static void takeScreenshot(Activity activity, View view, File saveFile) {
+        if (view == null) {
+            Log.w(TAG, "screenshot:view is null");
+        }
+        boolean isCacheEnable = view.isDrawingCacheEnabled();
+        view.setDrawingCacheEnabled(true);
+        Bitmap bmp = view.getDrawingCache();
+        try {
+            FileOutputStream outputStream = new FileOutputStream(saveFile);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            // 通知系统扫描图片文件
+            Uri uri = Uri.fromFile(saveFile);
+            Intent mediaScanIntent = new Intent(
+                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            mediaScanIntent.setData(uri);
+            activity.sendBroadcast(mediaScanIntent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            view.destroyDrawingCache();
+            view.setDrawingCacheEnabled(isCacheEnable);
+        }
     }
 }

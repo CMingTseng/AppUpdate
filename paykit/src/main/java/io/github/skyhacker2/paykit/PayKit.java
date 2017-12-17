@@ -142,11 +142,14 @@ public class PayKit {
                             } else {
                                 mActivation = true;
                                 saveActivation(context, mActivation);
+                                mDeviceId = Utils.genDeviceId();
+                                saveDeviceId(context, mDeviceId);
+
                                 // 生成序列号并保存到服务器
                                 final ActivationModel activationModel = new ActivationModel();
                                 activationModel.setActivationId(Utils.genShortId());
                                 activationModel.setOrderId(mOrderId);
-                                activationModel.setDeviceId(Utils.genDeviceId());
+                                activationModel.setDeviceId(mDeviceId);
                                 activationModel.save(new SaveListener<String>() {
                                     @Override
                                     public void done(String objectId, BmobException e) {
