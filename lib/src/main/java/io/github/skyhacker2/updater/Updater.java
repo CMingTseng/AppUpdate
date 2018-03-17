@@ -150,9 +150,7 @@ public class Updater {
                 String json = new String(combined, "utf-8");
                 Log.d(TAG, "online version json " + json);
                 mOnlineAppInfo = new JSONObject(json);
-                if (!isDebug()) {
-                    mInstallMode = mOnlineAppInfo.optInt("installMode");
-                }
+                mInstallMode = mOnlineAppInfo.optInt("installMode");
                 Log.d(TAG, "online versionCode " + mOnlineAppInfo.optString("versionCode"));
                 Log.d(TAG, "online versionName " + mOnlineAppInfo.optString("versionName"));
                 Log.d(TAG, "install mode " + mInstallMode);
@@ -296,26 +294,34 @@ public class Updater {
         return mInstance;
     }
 
+    public static void destroy() {
+        if (mInstance != null) {
+            mInstance.setContext(null);
+        }
+    }
+
     public Context getContext() {
         return mContext;
     }
 
     public void setContext(Activity context) {
         mContext = context;
-        mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
-        mHandler = new Handler(mContext.getMainLooper());
-        String json = getSharedPreferences().getString(PREF_JSON, null);
-        if (json != null) {
-            try {
-                JSONObject object = new JSONObject(json);
-                JSONObject params = object.optJSONObject("onlineParams");
-                OnlineParams.setParams(params);
-            } catch (JSONException e) {
-                e.printStackTrace();
+        if (mContext != null) {
+            mDownloadManager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+            mHandler = new Handler(mContext.getMainLooper());
+            String json = getSharedPreferences().getString(PREF_JSON, null);
+            if (json != null) {
+                try {
+                    JSONObject object = new JSONObject(json);
+                    JSONObject params = object.optJSONObject("onlineParams");
+                    OnlineParams.setParams(params);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        Log.d(TAG, "package " + mContext.getPackageName());
+            Log.d(TAG, "package " + mContext.getPackageName());
+        }
     }
 
     public String getAppID() {

@@ -12,4 +12,6 @@
     <string name="app_lib_alipay">支付宝赞助</string>
     <string name="app_lib_about_us">关于我们</string>
     <string name="app_lib_more_app">我们其他作品</string>
+    <string name="app_lib_ok">好</string>
+    <string name="app_lib_reject">残忍拒绝</string>
 </resources>

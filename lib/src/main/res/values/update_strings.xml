@@ -12,4 +12,6 @@
     <string name="app_lib_alipay">Alipay Donate</string>
     <string name="app_lib_about_us">About Us</string>
     <string name="app_lib_more_app">Other Products</string>
+    <string name="app_lib_ok">Rate</string>
+    <string name="app_lib_reject">No</string>
 </resources>
