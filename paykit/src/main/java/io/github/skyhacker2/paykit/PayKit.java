@@ -322,4 +322,9 @@ public class PayKit {
     public String getActivationId() {
         return mActivationId;
     }
+
+    public static boolean isActiveation(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return preferences.getBoolean(KEY_ACTIVATION, false);
+    }
 }
