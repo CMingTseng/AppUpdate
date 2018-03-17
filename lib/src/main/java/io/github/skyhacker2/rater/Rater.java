@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 
+import io.github.skyhacker2.updater.R;
+
 /**
  * Created by eleven on 2016/12/24.
  */
@@ -22,7 +24,7 @@ public class Rater {
         SharedPreferences preferences = context.getSharedPreferences("AppRate", Activity.MODE_PRIVATE);
         boolean hasRate = preferences.getBoolean("has_rate", false);
         long lanuchCount = preferences.getLong("lanuch_count", 0);
-        if (!hasRate && lanuchCount == 1) {
+        if (!hasRate && lanuchCount == 4) {
             Rater.showRateDialog(context, title, message);
         }
         SharedPreferences.Editor editor = preferences.edit();
@@ -37,13 +39,13 @@ public class Rater {
         builder.setTitle(title)
                 .setMessage(message)
                 .setCancelable(false)
-                .setNegativeButton("残忍拒绝", new DialogInterface.OnClickListener() {
+                .setNegativeButton(context.getString(R.string.app_lib_reject), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setPositiveButton("好", new DialogInterface.OnClickListener() {
+                .setPositiveButton(context.getString(R.string.app_lib_rate), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
